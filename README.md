@@ -1,1 +1,2 @@
-# web_fastAPI
+run server
+uvicorn main:app --reload
