@@ -40,10 +40,11 @@ class JSONStorage(BaseStorage, ABC):
         with open(self.file_name, mode='r') as file:
             content: list[dict] = json.load(file)
 
-        tour['id'] = uuid4().hex
-        content.append(tour)
+        tour1 = {'country': country, 'operator': operator, 'price': price, 'duration': duration, 'id': uuid4().hex}
+
+        content.append(tour1)
         with open(self.file_name, mode='w', encoding='utf-8') as file:
-            json.dump(content, file, indent=4)
+            json.dump(content, file, indent=5)
 
     def get_tour(self, skip: int = 0, limit: int = 10, search_param: str = ''):
         with open(self.file_name, mode='r') as file:
