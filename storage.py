@@ -7,7 +7,8 @@ from uuid import uuid4
 class BaseStorage(ABC):
 
     @abstractmethod
-    def create_tour(self, tour: dict, country: str, operator: str, price: float, duration: int):
+    def create_tour(self, tour: dict, country: str, operator: str, price: float, duration: int, tags: list[str],
+                    description: str):
         pass
 
     @abstractmethod
@@ -19,7 +20,8 @@ class BaseStorage(ABC):
         pass
 
     @abstractmethod
-    def update_tour(self, tour_id: str, country: str, operator: str, price: float, duration: int):
+    def update_tour(self, tour_id: str, country: str, operator: str, price: float, duration: int, tags: list[str],
+                    description: str = None):
         pass
 
     @abstractmethod
@@ -36,15 +38,22 @@ class JSONStorage(BaseStorage, ABC):
             with open(self.file_name, mode='w', encoding='utf-8') as file:
                 json.dump([], file, indent=4)
 
-    def create_tour(self, tour: dict, country: str, operator: str, price: float, duration: int):
+    def create_tour(self, country: str, operator: str, price: float, tags: list[str], duration: int,
+                    description: str):
         with open(self.file_name, mode='r') as file:
             content: list[dict] = json.load(file)
 
-        tour1 = {'country': country, 'operator': operator, 'price': price, 'duration': duration, 'id': uuid4().hex}
+        tour1 = {'country': country, 'operator': operator, 'price': price, 'tags': tags,
+                 'duration': duration,
+                 'description': description,
+                 'id': uuid4().hex}
 
         content.append(tour1)
+
         with open(self.file_name, mode='w', encoding='utf-8') as file:
             json.dump(content, file, indent=5)
+
+        return tour1
 
     def get_tour(self, skip: int = 0, limit: int = 10, search_param: str = ''):
         with open(self.file_name, mode='r') as file:
@@ -69,33 +78,32 @@ class JSONStorage(BaseStorage, ABC):
                 return tour
         return {}
 
-    def update_tour(self, tour_id: str, country: str, operator: str, price: float, duration: int):
+    def update_tour(self, tour_id: str, country: str, operator: str, price: float, tags: list[str], duration: int,
+                    description: str):
         with open(self.file_name, mode='r') as file:
             content: list[dict] = json.load(file)
-        was_found = False
         for tour in content:
             if tour_id == tour['id']:
                 tour['country'] = country
-                was_found = True
-                break
-        if was_found:
-            with open(self.file_name, mode='w', encoding='utf-8') as file:
-                json.dump(content, file, indent=4)
+                tour['operator'] = operator
+                tour['price'] = price
+                tour['duration'] = duration
+                tour['tags'] = tags
+                tour['description'] = description
+                with open(self.file_name, mode='w', encoding='utf-8') as file:
+                    json.dump(content, file, indent=4)
+                return tour
         raise ValueError()
 
     def delete_tour(self, tour_id: str):
         with open(self.file_name, mode='r') as file:
             content: list[dict] = json.load(file)
-        was_found = False
         for tour in content:
             if tour_id == tour['id']:
                 content.remove(tour)
-                was_found = True
                 break
-        if was_found:
-            with open(self.file_name, mode='w', encoding='utf-8') as file:
-                json.dump(content, file, indent=4)
-        raise ValueError()
+        with open(self.file_name, mode='w', encoding='utf-8') as file:
+            json.dump(content, file, indent=4)
 
 
 storage = JSONStorage()
