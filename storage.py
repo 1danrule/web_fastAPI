@@ -62,7 +62,8 @@ class JSONStorage(BaseStorage, ABC):
         if search_param:
             data = []
             for tour in content:
-                if search_param in tour['country']:
+                if search_param in tour['country'] or search_param in tour['operator'] or search_param in tour['tags'] \
+                        or search_param in tour['description']:
                     data.append(tour)
             sliced = data[skip:][:limit]
             return sliced
