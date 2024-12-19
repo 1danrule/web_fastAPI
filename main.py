@@ -2,6 +2,9 @@ import json
 from enum import Enum
 from typing import Annotated
 
+from typing import Annotated
+from pydantic import Field, conlist
+
 from fastapi import FastAPI, Query, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
@@ -26,7 +29,7 @@ class NewTour(BaseModel):
     country: str
     price: float = Field(default=100, gt=0.0)
     duration: int
-    tags: list[TypeOfTour] = Field(default=[], max_items=2)
+    tags: Annotated[list[TypeOfTour], Field(default=[]), conlist(item_type=TypeOfTour, max_length=2)]
     description: str = None
 
 
